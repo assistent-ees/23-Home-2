@@ -9,8 +9,6 @@ template <typename T>
 class MatrixClass
 {
 public:
-	float** matrix;
-
 	~MatrixClass()
 	{
 		for (int i = 0; i < lines; i++)
@@ -20,34 +18,56 @@ public:
 		delete[] matrix;
 	}
 
-    MatrixClass(PlaceForMatrix Place)
-    {
-        switch (Place)
-        {
-        case PlaceForMatrix::None:
-            break;
-        case PlaceForMatrix::Console:
-        {
-            Place = PlaceForMatrix::Console;
+	static MatrixClass ZeroMatrix(int lines, int columns)
+	{
+		MatrixClass<float> ZeroMat(columns, lines);
+		ZeroMat.ZeroInitializeMatrix();
+		return ZeroMat;
+	}
 
-            cout << "Write count of lines:" << endl;
-            cin >> lines;
+	static MatrixClass ASingleMatrix(int lines, int columns)
+	{
+		MatrixClass<float> SingleMat(columns, lines);
+		SingleMat.ZeroInitializeMatrix();
+		for (int i = 0; i < columns; i++)
+			for (int j = 0; j < lines; j++)
+				if (i == j)
+				{
+					SingleMat.matrix[i][j] = 1;
+					break;
+				}
 
-            cout << "Write count of columns:" << endl;
-            cin >> columns;
+		return SingleMat;
+	}
+
+	MatrixClass(PlaceForMatrix Place)
+	{
+		switch (Place)
+		{
+		case PlaceForMatrix::None:
+			break;
+		case PlaceForMatrix::Console:
+		{
+			Place = PlaceForMatrix::Console;
+
+			cout << "Write count of lines:" << endl;
+			cin >> lines;
+
+			cout << "Write count of columns:" << endl;
+			cin >> columns;
 			ReadMatrixFromConsole();
-            break;
-        }
-        case PlaceForMatrix::File:
-        {
-            Place = PlaceForMatrix::File;
-            break;
-        }
+			break;
+		}
+		case PlaceForMatrix::File:
+		{
+			Place = PlaceForMatrix::File;
+			break;
+		}
 
-        default:
-            break;
-        }
-    }
+		default:
+			break;
+		}
+	}
 
 	MatrixClass(MatrixClass& mat)
 	{
@@ -326,6 +346,13 @@ public:
 		return !(matrix == Matrix.matrix);
 	}
 
+	void operator=(MatrixClass &Matrix)
+	{
+		matrix = Matrix.matrix;
+		columns = Matrix.columns;
+		lines = Matrix.lines;
+	}
+
 	void ZeroInitializeMatrix()
 	{
 		for (int i = 0; i < lines; i++)
@@ -492,8 +519,7 @@ public:
 		return obratn_matr;
 	}
 
-private:
-    bool Deleted = false;
-    PlaceForMatrix Place = PlaceForMatrix::None;
-    unsigned int columns, lines = 0;
+	float** matrix;
+	PlaceForMatrix Place = PlaceForMatrix::None;
+	unsigned int columns, lines = 0;
 };

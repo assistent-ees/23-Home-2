@@ -6,10 +6,15 @@ using namespace std;
 
 int main()
 {
-    MatrixClass<float> ParamMat(3, 3);
+    int s = 2;
+    (MatrixClass<float>::ZeroMatrix(s,s)).ShowMatrix();
+    (MatrixClass<float>::ASingleMatrix(s,s)).ShowMatrix();
+
+    cout << "Add elements: " << endl;
+    MatrixClass<float> ParamMat(s, s);
     ParamMat.InitializeMatrixFromConsole();
     ParamMat.ShowMatrix();
-    ParamMat.ShowMatrix((!ParamMat).matrix, 3, 3);
+    ParamMat.ShowMatrix((!ParamMat).matrix, s, s);
 
     cout << "FirstMatrix:" << endl;
     MatrixClass<float> MatrixFromFile(PlaceForMatrix::File);
@@ -22,6 +27,9 @@ int main()
     char SecondFilePath[] = "C:\\Users\\PC\\Desktop\\Лабы\\Программ\\Дз\\ReadMeAgain.txt";
     TestMat.ReadMatrixFromFile(SecondFilePath);
     TestMat.ShowMatrix();
+
+    ParamMat = TestMat;
+    ParamMat.ShowMatrix();
 
     cout << "Create new matrix" << endl;
     MatrixClass<float> ConsoleMat(PlaceForMatrix::Console);

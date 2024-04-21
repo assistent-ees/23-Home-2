@@ -124,61 +124,6 @@ class Matrix
             return result;
         }
 
-        Matrix operator!() const
-        {
-            if (rows!=cols)
-            {
-                throw std::runtime_error("Matrix is not square and can't be inverted");
-            }
-
-            Matrix extendedM(rows,2*cols);
-            for (size_t i=0;i<rows;++i)
-            {
-                for (size_t j=0;j<cols;++j)
-                {
-                    extendedM.A[i][j]=A[i][j];
-                    if (i==j)
-                        extendedM.A[i][j+cols]=1;
-                    else
-                        extendedM.A[i][j+cols]=0;
-                }
-            }
-
-            for (size_t i=0;i<rows;++i)
-            {
-                for (size_t j=0;j<cols;++j)
-                {
-                    double r=extendedM.A[j][i]/extendedM.A[i][i];
-                    for (size_t k=0;k<2*rows;++k)
-                    {
-                        extendedM.A[j][k]-=r*extendedM.A[i][k];
-                    }
-                }
-            }
-
-            for (size_t i=0;i<rows;++i)
-            {
-                double d=extendedM.A[i][i];
-                for (size_t j=0;j<2*cols;++j)
-                {
-                    extendedM.A[i][j]/=d;
-                }
-            }
-
-            Matrix result(rows,cols);
-            for (size_t i=0;i<rows;++i)
-            {
-                for (size_t j=0;j<cols;++j)
-                {
-                    result.A[i][j]=extendedM.A[i][j+cols];
-                }
-            }
-
-            return result;
-        }
-
-
-
         Matrix& operator=(const Matrix& other) const
         {
             if (&other == this)
@@ -248,15 +193,103 @@ class Matrix
 
             return os;
         }
+
+        T determinant()
+        {   
+            return determ(A,rows);
+        }
+
+        void getMinor(T **matr,size_t n,T **minor,size_t row,size_t col)
+        {
+            size_t r=0, c=0;
+            for (size_t i=0;i<n;++i)
+            {
+                if (i==row)
+                    continue;
+                for (size_t j=0;j<n;++j)
+                {
+                    if (j==col)
+                        continue;
+                    minor[r][c]=matr[i][j];
+                    ++c;
+                }
+                ++r;
+                c=0;
+            }
+        }
+
+        Matrix<T> operator!()
+        {
+            T det=determinant();
+            if (det==0)
+            {
+                std::cerr << "Matrix is singular, inverse matrix doesn't exist" << std::endl;
+                return *this;
+            }
+
+            Matrix<T> inverseMatr(rows,cols);
+            size_t n=rows;
+            for (size_t i=0;i<n;++i)
+            {
+                for (size_t j=0;j<n;++j)
+                {
+                    T** minor =new T*[n-1];
+                    for (size_t k=0;k<n-1;++k)
+                    {
+                        minor[k]=new T[n-1];
+                    }
+                    getMinor(A,n,minor,i,j);
+                    T sign=((i+j)%2==0) ? 1 : -1;
+                    inverseMatr.A[j][i]=sign*determ(minor,n-1)/det;
+                    
+                    for (size_t k=0;k<n-1;++k)
+                    {
+                        delete[] minor[k];
+                    }
+                    delete[] minor;
+                }
+            }
+
+            return inverseMatr;
+        }
+
+        T determ(T** matr,size_t n)
+        {
+            if (n==1)
+            {
+                return matr[0][0];
+            }
+            
+            T det=0;
+            int sign=1;
+            T** minor=new T*[n-1];
+            for (size_t i=0;i<n-1;++i)
+            {
+                minor[i]=new T[n-1];
+            }
+            for (size_t i=0;i<n;++i)
+            {
+                getMinor(matr,n,minor,0,i);
+                det+=sign*matr[0][i]*determ(minor,n-1);
+                sign=-sign;
+            }
+            for (size_t i=0;i<n-1;++i)
+            {
+                delete[] minor[i];
+            }  
+            delete[] minor;
+
+            return det;
+        }
 };
 
 int main()
 {
     Matrix<double> M1("input1.txt");
     Matrix<double> M2("input2.txt");
-    Matrix<int> M3=Matrix<int>::identity(3);
-    
+    Matrix<double> M3=Matrix<double>::identity(2);
+
     std::cout << M1 << std::endl;
     std::cout << M2 << std::endl;
-    std::cout << M3 << std::endl;
+    std::cout << M3.determinant() << std::endl;
 }
